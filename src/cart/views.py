@@ -24,6 +24,7 @@ def cart_remove(request, product_id):
     cart = Cart(request)
     product = get_object_or_404(Product, id=product_id)
     cart.remove(product)
+    print(product.id)
     return redirect('cart:cart_detail')
 
 
@@ -34,8 +35,9 @@ def cart_detail(request):
             'quantity': item['quantity'],
             'override': True})
     context = {
-        'other_products': Product.objects.all()[:4],
+        'other_products': Product.objects.all()[:2],
         'categories': Category.objects.all(),
         'cart': cart,
     }
+
     return render(request, 'cart/detail.html', context)

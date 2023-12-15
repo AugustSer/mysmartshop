@@ -26,29 +26,31 @@
                                     </thead>
                                     <tbody>
                                     {% for item in cart %}
+                                        {% with product=item.product %}
                                         <tr class="cart_item">
-                                            <td class="product-remove">
+                                            <td class="product-remove ">
                                                 <form action="{% url 'cart:cart_remove' item.product.id %}"
                                                       method="post">
-                                                    {% csrf_token %}
-                                                    <button title="Remove this item" class="remove" type="submit">×
+                                                    <button type="submit" class="btn btn-primary height-auto btn-sm"
+                                                       formaction="{% url "cart:cart_remove" product.id %}">X
+                                                        {% csrf_token %}
                                                     </button>
                                                 </form>
                                             </td>
 
                                             <td class="product-thumbnail">
-                                                <a href="single-product.html"><img width="145" height="145"
+                                                <a href="{{ item.product.get_absolute_url }}"><img width="145" height="145"
                                                                                    alt="poster_1_up"
                                                                                    class="shop_thumbnail"
-                                                                                   src="img/product-thumb-2.jpg"></a>
+                                                                                   src="{{ item.product.image.url }}"></a>
                                             </td>
 
                                             <td class="product-name">
-                                                <a href="single-product.html">Ship Your Idea</a>
+                                                <a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a>
                                             </td>
 
                                             <td class="product-price">
-                                                <span class="amount">£15.00</span>
+                                                <span class="amount">{{item.product.price}}</span>
                                             </td>
 
                                             <td class="product-quantity">
@@ -56,15 +58,16 @@
                                                     <input type="button" class="minus" value="-">
                                                     <input type="number" size="4" class="input-text qty text"
                                                            title="Qty"
-                                                           value="1" min="0" step="1">
+                                                           value="{{ item.quantity }}" min="0" step="1">
                                                     <input type="button" class="plus" value="+">
                                                 </div>
                                             </td>
 
                                             <td class="product-subtotal">
-                                                <span class="amount">£15.00</span>
+                                                <span class="amount">{{ item.total_price }}</span>
                                             </td>
                                         </tr>
+                                        {% endwith %}
                                     {% endfor %}
                                     <tr>
                                         <td class="actions" colspan="6">
@@ -76,8 +79,11 @@
                                                        class="button">
                                             </div>
                                             <input type="submit" value="Update Cart" name="update_cart" class="button">
-                                            <input type="submit" value="Checkout" name="proceed"
-                                                   class="checkout-button button alt wc-forward">
+                                            <button type="submit"  name="proceed"
+                                                   class="checkout-button button alt wc-forward" formaction="{% url "orders:order_create" %}">
+                                                {% csrf_token %}
+                                                Checkout
+                                            </button>
                                         </td>
                                     </tr>
                                     </tbody>
@@ -89,35 +95,37 @@
 
                                 <div class="cross-sells">
                                     <h2>You may be interested in...</h2>
+                                    {% for product in other_products %}
                                     <ul class="products">
                                         <li class="product">
-                                            <a href="single-product.html">
+                                            <a href="detail.html">
                                                 <img width="325" height="325" alt="T_4_front"
                                                      class="attachment-shop_catalog wp-post-image"
-                                                     src="img/product-2.jpg">
-                                                <h3>Ship Your Idea</h3>
-                                                <span class="price"><span class="amount">£20.00</span></span>
+                                                     src="{{ product.image.url }}">
+                                                <h3>{{ product.name }}</h3>
+                                                <span class="price"><span class="amount">£{{ product.price }}</span></span>
                                             </a>
 
                                             <a class="add_to_cart_button" data-quantity="1" data-product_sku=""
-                                               data-product_id="22" rel="nofollow" href="single-product.html">Select
+                                               data-product_id="22" rel="nofollow" href="{{ product.get_absolute_url }}">Select
                                                 options</a>
                                         </li>
 
-                                        <li class="product">
-                                            <a href="single-product.html">
-                                                <img width="325" height="325" alt="T_4_front"
-                                                     class="attachment-shop_catalog wp-post-image"
-                                                     src="img/product-4.jpg">
-                                                <h3>Ship Your Idea</h3>
-                                                <span class="price"><span class="amount">£20.00</span></span>
-                                            </a>
-
-                                            <a class="add_to_cart_button" data-quantity="1" data-product_sku=""
-                                               data-product_id="22" rel="nofollow" href="single-product.html">Select
-                                                options</a>
-                                        </li>
+{#                                        <li class="product">#}
+{#                                            <a href="{{ product.get_absolute_url }}">#}
+{#                                                <img width="325" height="325" alt="T_4_front"#}
+{#                                                     class="attachment-shop_catalog wp-post-image"#}
+{#                                                     src="/static/img/product-4.jpg">#}
+{#                                                <h3>Ship Your Idea</h3>#}
+{#                                                <span class="price"><span class="amount">£20.00</span></span>#}
+{#                                            </a>#}
+{##}
+{#                                            <a class="add_to_cart_button" data-quantity="1" data-product_sku=""#}
+{#                                               data-product_id="22" rel="nofollow" href="{{ product.get_absolute_url }}">Select#}
+{#                                                options</a>#}
+{#                                        </li>#}
                                     </ul>
+                                    {% endfor %}
                                 </div>
 
 
@@ -128,7 +136,7 @@
                                         <tbody>
                                         <tr class="cart-subtotal">
                                             <th>Cart Subtotal</th>
-                                            <td><span class="amount">£15.00</span></td>
+                                            <td><span class="amount">{{ cart.get_total_price }}</span></td>
                                         </tr>
 
                                         <tr class="shipping">
@@ -138,7 +146,7 @@
 
                                         <tr class="order-total">
                                             <th>Order Total</th>
-                                            <td><strong><span class="amount">£15.00</span></strong></td>
+                                            <td><strong><span class="amount">{{ cart.get_total_price }}</span></strong></td>
                                         </tr>
                                         </tbody>
                                     </table>

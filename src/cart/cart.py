@@ -14,12 +14,7 @@ class Cart:
         self.cart = cart
 
     def __iter__(self):
-        """
-        Iterate over the items in the cart and get the products
-        from the database.
-        """
         product_ids = self.cart.keys()
-        # get the product objects and add them to the cart
         products = Product.objects.filter(id__in=product_ids)
         cart = self.cart.copy()
         for product in products:
@@ -30,15 +25,9 @@ class Cart:
             yield item
 
     def __len__(self):
-        """
-        Count all items in the cart.
-        """
         return sum(item['quantity'] for item in self.cart.values())
 
     def add(self, product, quantity=1, override_quantity=False):
-        """
-        Add a product to the cart or update its quantity.
-        """
         product_id = str(product.id)
         if product_id not in self.cart:
             self.cart[product_id] = {'quantity': 0,
@@ -50,12 +39,12 @@ class Cart:
         self.save()
 
     def save(self):
-        # mark the session as "modified" to make sure it gets saved
         self.session.modified = True
 
     def remove(self, product):
         product_id = str(product.id)
         if product_id in self.cart:
+            print(product_id)
             del self.cart[product_id]
             self.save()
 
